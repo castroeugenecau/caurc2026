@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+:root {
+    --cau-navy: #05080f;
+    --cau-gold: #d4af37;
+    --cau-blue: #2563eb;
+}
+
+body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background-color: var(--cau-navy); }
+
+/* CAU Blueprint Background Effect */
+.bg-cau-blueprint {
+    background-color: #0c121d;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
+    background-size: 30px 30px;
+    background-position: -19px -19px;
+}
+
+.text-cau-gold { color: var(--cau-gold); }
+
+/* Sidebar Navigation */
+.nav-header { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #4b5563; letter-spacing: 0.15rem; margin: 1.5rem 0 0.5rem 0; }
+.nav-item { padding: 0.6rem 1rem; border-radius: 0.5rem; color: #6b7280; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 0.2rem; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.03); color: white; }
+.nav-item.active { background: linear-gradient(90deg, rgba(37, 99, 235, 0.2), transparent); color: white; border-left: 3px solid var(--cau-blue); }
+
+/* UI Cards */
+.glass-card { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
+.podium-card { padding: 1.5rem 1rem; border-radius: 1.25rem; text-align: center; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); }
+
+.gold { border-bottom: 4px solid var(--cau-gold); box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.2); }
+.silver { border-bottom: 4px solid #c0c0c0; }
+.bronze { border-bottom: 4px solid #cd7f32; }
+
+.rank-badge { font-size: 0.55rem; font-weight: 900; padding: 0.2rem 0.6rem; border-radius: 2rem; display: inline-block; margin-bottom: 0.5rem; border: 1px solid currentColor; background: rgba(0,0,0,0.2); }
+
+/* Scrollbars */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.custom-scrollbar::-webkit-scrollbar { width: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 10px; }

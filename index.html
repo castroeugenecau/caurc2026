@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAU Engineering | Robotics Championship</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-cau-navy text-white h-screen flex items-center justify-center p-4 overflow-hidden">
+
+    <div class="main-container w-full max-w-7xl h-[95vh] flex rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl shadow-black">
+        
+        <aside class="w-72 bg-[#060a14] p-8 border-r border-white/5 flex flex-col shrink-0">
+            <div class="mb-10 text-center">
+                <div class="w-30 h-30 bg-white rounded-full mx-auto mb-4 flex items-center justify-center p-2 shadow-lg shadow-blue-900/20">
+                    <img src="logo.png" alt="CAU" class="w-full h-auto object-contain" onerror="this.src='https://via.placeholder.com/80?text=CAU'">
+                </div>
+                <h1 class="text-xl font-black tracking-tighter uppercase leading-none">CAURC <span class="text-cau-gold">2026</span></h1>
+                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-1">Engineering School</p>
+            </div>
+            
+            <nav class="flex-1 space-y-6 overflow-y-auto custom-scrollbar">
+                <div>
+                    <h3 class="nav-header">Line Following</h3>
+                    <div class="nav-item active" data-cat="Line Following" data-lvl="1">Level 1</div>
+                    <div class="nav-item" data-cat="Line Following" data-lvl="2">Level 2</div>
+                    <div class="nav-item" data-cat="Line Following" data-lvl="3">Level 3</div>
+                </div>
+                <div>
+                    <h3 class="nav-header">Pick and Place</h3>
+                    <div class="nav-item" data-cat="Pick and Place" data-lvl="1">Level 1</div>
+                    <div class="nav-item" data-cat="Pick and Place" data-lvl="2">Level 2</div>
+                    <div class="nav-item" data-cat="Pick and Place" data-lvl="3">Level 3</div>
+                </div>
+                <div>
+                    <h3 class="nav-header">Mini Sumo</h3>
+                    <div class="nav-item" data-cat="Mini Sumo" data-lvl="1">Level 1</div>
+                    <div class="nav-item" data-cat="Mini Sumo" data-lvl="2">Level 2</div>
+                    <div class="nav-item" data-cat="Mini Sumo" data-lvl="3">Level 3</div>
+                </div>
+            </nav>
+            <div class="mt-auto pt-4 text-[9px] text-gray-500 uppercase tracking-widest text-center border-t border-white/5">Central Asian University</div>
+        </aside>
+
+        <main class="flex-1 bg-cau-blueprint p-8 flex flex-col overflow-hidden relative">
+            <header class="mb-6 flex justify-between items-end shrink-0 relative z-10">
+                <div>
+                    <p id="display-category" class="text-cau-gold text-xs font-black uppercase tracking-[0.4em] mb-1">Category</p>
+                    <h2 id="display-level" class="text-4xl font-bold tracking-tight">Level 1</h2>
+                </div>
+                <div class="text-right">
+                    <span id="sync-time" class="text-[10px] font-mono text-gray-400 block">SYNCING DATA...</span>
+                    <span class="text-[9px] bg-cau-gold/20 text-cau-gold px-2 py-0.5 rounded-full font-bold">LIVE FEED</span>
+                </div>
+            </header>
+
+            <div class="flex-1 flex flex-col gap-6 overflow-hidden relative z-10">
+                <div id="podium" class="grid grid-cols-3 gap-4 shrink-0"></div>
+
+                <div class="grid grid-cols-5 gap-6 h-[250px] shrink-0">
+                    <div class="col-span-3 glass-card p-5 flex flex-col">
+                        <h4 class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-2">Performance Metrics</h4>
+                        <div class="flex-1"><canvas id="leaderboardChart"></canvas></div>
+                    </div>
+                    <div class="col-span-2 glass-card p-5 flex flex-col overflow-hidden">
+                        <h4 id="list-title" class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-3 italic">Rankings Scroll</h4>
+                        <div id="team-list-small" class="flex-1 overflow-y-auto no-scrollbar"></div>
+                    </div>
+                </div>
+
+                <div class="glass-card flex-1 flex flex-col overflow-hidden">
+                    <h4 class="text-[9px] font-bold text-gray-400 uppercase tracking-widest p-5 pb-2">Full Competition Leaderboard</h4>
+                    <div id="full-table-container" class="flex-1 overflow-y-auto no-scrollbar mx-5 mb-5 rounded-lg border border-white/5 bg-black/20">
+                        <table class="w-full text-left text-sm border-collapse">
+                            <thead class="sticky top-0 bg-[#121826] z-20 text-cau-gold font-black uppercase text-[10px]">
+                                <tr>
+                                    <th class="p-3 border-b border-white/10">Rank</th>
+                                    <th class="p-3 border-b border-white/10">Team</th>
+                                    <th class="p-3 border-b border-white/10 text-right">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="full-table-body" class="text-gray-300"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

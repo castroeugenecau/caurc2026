@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
 
 :root {
     --cau-navy: #05080f;
@@ -6,37 +6,104 @@
     --cau-blue: #2563eb;
 }
 
-body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background-color: var(--cau-navy); }
+body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cau-navy); overflow: hidden; }
 
-/* CAU Blueprint Background Effect */
+/* Engineering Blueprint Background */
 .bg-cau-blueprint {
-    background-color: #0c121d;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0);
-    background-size: 30px 30px;
-    background-position: -19px -19px;
+    background-image: linear-gradient(rgba(212,175,55,0.04) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(212,175,55,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
 }
 
-.text-cau-gold { color: var(--cau-gold); }
+.nav-item { 
+    padding: 0.8rem 1.8rem; 
+    color: #94a3b8; 
+    font-size: 1.4rem; 
+    font-weight: 800; 
+    cursor: pointer; 
+    border-radius: 1rem;
+    transition: 0.3s;
+    white-space: nowrap;
+}
 
-/* Sidebar Navigation */
-.nav-header { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; color: #4b5563; letter-spacing: 0.15rem; margin: 1.5rem 0 0.5rem 0; }
-.nav-item { padding: 0.6rem 1rem; border-radius: 0.5rem; color: #6b7280; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 0.2rem; border-left: 3px solid transparent; }
-.nav-item:hover { background: rgba(255,255,255,0.03); color: white; }
-.nav-item.active { background: linear-gradient(90deg, rgba(37, 99, 235, 0.2), transparent); color: white; border-left: 3px solid var(--cau-blue); }
+.nav-item.active { background: var(--cau-blue); color: white; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5); }
 
-/* UI Cards */
-.glass-card { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 1.5rem; }
-.podium-card { padding: 1.5rem 1rem; border-radius: 1.25rem; text-align: center; border: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.3); }
+/* --- Balloon Caption (Tooltip) Styles --- */
 
-.gold { border-bottom: 4px solid var(--cau-gold); box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.2); }
-.silver { border-bottom: 4px solid #c0c0c0; }
-.bronze { border-bottom: 4px solid #cd7f32; }
+.nav-item {
+    position: relative; /* Required for absolute positioning of the balloon */
+}
 
-.rank-badge { font-size: 0.55rem; font-weight: 900; padding: 0.2rem 0.6rem; border-radius: 2rem; display: inline-block; margin-bottom: 0.5rem; border: 1px solid currentColor; background: rgba(0,0,0,0.2); }
+/* The Balloon Box */
+.nav-item::after {
+    content: attr(data-tip); /* Pulls text from the data-tip attribute */
+    position: absolute;
+    top: 130%; /* Position it below the button */
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: #d4af37; /* CAU Gold */
+    color: #05080f; /* Dark Navy for contrast */
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 800;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease-out;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    z-index: 100;
+}
 
-/* Scrollbars */
+/* The Balloon Triangle Arrow */
+.nav-item::before {
+    content: '';
+    position: absolute;
+    top: 115%;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent transparent #d4af37 transparent;
+    opacity: 0;
+    transition: all 0.2s ease-out;
+    z-index: 100;
+}
+
+/* Show the Balloon on Hover */
+.nav-item:hover::after, 
+.nav-item:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.glass-card { 
+    background: rgba(0, 0, 0, 0.75); 
+    backdrop-filter: blur(20px); 
+    border: 2px solid rgba(255, 255, 255, 0.1); 
+    border-radius: 2.5rem; 
+}
+
+.podium-card { 
+    padding: 2.5rem; 
+    border-radius: 2.5rem; 
+    text-align: center; 
+    border: 3px solid rgba(255,255,255,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.gold { border-color: var(--cau-gold); box-shadow: 0 0 50px rgba(212, 175, 55, 0.15); }
+
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-.custom-scrollbar::-webkit-scrollbar { width: 3px; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 10px; }
+/* Table and Row Sizes */
+#team-list-small .challenger-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 2rem; background: rgba(255,255,255,0.03);
+    border-radius: 2rem; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.05);
+}
+
+#full-table-body tr td { font-size: 2.5rem; padding: 1.8rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }

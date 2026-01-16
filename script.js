@@ -5,13 +5,28 @@ let currentPage = 0;
 let displayTimer = null;
 
 async function init() {
+    // Start clock immediately
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // Initial data fetch
     await refreshData();
+    // Refresh data every 30 seconds
     setInterval(refreshData, 30000); 
+}
+
+function updateTime() {
+    const timeEl = document.getElementById('sync-time');
+    if (timeEl) {
+        const now = new Date();
+        timeEl.innerText = "LAST SYNC: " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
 }
 
 async function refreshData() {
     try {
         const response = await fetch(CSV_URL);
+        if (!response.ok) throw new Error('Network response was not ok');
         const text = await response.text();
         const rows = text.split('\n').filter(r => r.trim() !== '').slice(1);
         
@@ -24,7 +39,10 @@ async function refreshData() {
 
         const active = document.querySelector('.nav-item.active');
         if (active) updateDashboard(active.dataset.cat, active.dataset.lvl);
-    } catch (err) { console.error("Sync Error", err); }
+    } catch (err) { 
+        console.error("Sync Error:", err);
+        document.getElementById('sync-time').innerText = "CONNECTION LOST - RETRYING...";
+    }
 }
 
 function updateDashboard(cat, lvl) {
@@ -61,7 +79,7 @@ function renderPagedUI(data, cat, lvl) {
 
     if (data.length === 0) return;
 
-    // 1. PODIUM
+    // 1. PODIUM (Top 3)
     data.slice(0, 3).forEach(team => {
         const color = team.rank === 1 ? '#d4af37' : (team.rank === 2 ? '#c0c0c0' : '#cd7f32');
         podium.innerHTML += `
@@ -72,37 +90,40 @@ function renderPagedUI(data, cat, lvl) {
             </div>`;
     });
 
-    // 2. DATA CONFIGURATION
+    // 2. DATA Slicing Logic
     let challengerLimit = (lvl === "1") ? 15 : (cat === "Pick and Place" ? 5 : 4);
     const challengersData = data.slice(3, challengerLimit);
     const completeData = data; 
 
-    const perPageLeft = 4;   // Fixed 4 for Challengers
-    const perPageRight = 5;  // Fixed 5 for Complete Standings
+    const perPageLeft = 4;   // 4 teams per page
+    const perPageRight = 5;  // 5 teams per page
 
     function rotatePage() {
+        // Exit animation
         [smallList, tableBody].forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateX(-20px)';
+            if(el) { el.style.opacity = '0'; el.style.transform = 'translateX(-20px)'; }
         });
 
         setTimeout(() => {
+            // Slicing
             const leftIdx = (currentPage * perPageLeft) % (challengersData.length || 1);
             const leftItems = challengersData.slice(leftIdx, leftIdx + perPageLeft);
             
             const rightIdx = (currentPage * perPageRight) % (completeData.length || 1);
             const rightItems = completeData.slice(rightIdx, rightIdx + perPageRight);
 
+            // Render Left (4 items)
             smallList.innerHTML = leftItems.map(team => `
                 <div class="challenger-row">
                     <div class="flex items-center gap-8">
                         <span class="challenger-rank">#${team.rank}</span>
-                        <span class="challenger-name truncate w-[420px]">${team.team}</span>
+                        <span class="challenger-name truncate w-[400px]">${team.team}</span>
                     </div>
-                    <span class="challenger-score shadow-xl">${team.score}</span>
+                    <span class="challenger-score">${team.score}</span>
                 </div>
-            `).join('') || `<p class="text-gray-500 italic p-6 text-2xl">Awaiting Qualifiers...</p>`;
+            `).join('') || `<p class="text-gray-500 p-6 text-2xl">Finals in Progress...</p>`;
 
+            // Render Right (5 items)
             tableBody.innerHTML = rightItems.map(team => `
                 <tr>
                     <td class="rank-col">#${team.rank}</td>
@@ -111,9 +132,9 @@ function renderPagedUI(data, cat, lvl) {
                 </tr>
             `).join('');
 
+            // Entry animation
             [smallList, tableBody].forEach(el => {
-                el.style.opacity = '1';
-                el.style.transform = 'translateX(0)';
+                if(el) { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; }
             });
 
             currentPage++;
@@ -122,7 +143,7 @@ function renderPagedUI(data, cat, lvl) {
 
     currentPage = 0;
     rotatePage();
-    displayTimer = setInterval(rotatePage, 5600); 
+    displayTimer = setInterval(rotatePage, 5600); // 5s pause + 0.6s anim
 }
 
 // Nav Listeners

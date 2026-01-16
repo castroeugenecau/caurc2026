@@ -107,3 +107,36 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cau
 }
 
 #full-table-body tr td { font-size: 2.5rem; padding: 1.8rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+
+/* --- Paged Animation Styles --- */
+
+/* The container that holds the content must be relative */
+#team-list-small, #full-table-body {
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+/* Slide out to the left */
+.slide-out {
+    opacity: 0;
+    transform: translateX(-50px);
+}
+
+/* Slide in from the right */
+.slide-in {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Ensure table rows are consistent heights so the "page" doesn't jump */
+#full-table-body tr {
+    height: 80px; 
+}
+
+.challenger-row {
+    height: 90px;
+}
+
+/* Hide scrollbars completely as we are now paged */
+.no-scrollbar {
+    overflow: hidden !important;
+}

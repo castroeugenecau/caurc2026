@@ -79,14 +79,34 @@ function renderPagedUI(data, cat, lvl) {
 
     if (data.length === 0) return;
 
-    // 1. PODIUM (Top 3)
+// 1. HORIZONTAL PODIUM (Top 3)
     data.slice(0, 3).forEach(team => {
-        const color = team.rank === 1 ? '#d4af37' : (team.rank === 2 ? '#c0c0c0' : '#cd7f32');
+        let theme = "";
+        let icon = "";
+        let color = "";
+
+        if (team.rank === 1) {
+            theme = "gold"; icon = "fa-crown"; color = "#d4af37";
+        } else if (team.rank === 2) {
+            theme = "silver"; icon = "fa-medal"; color = "#c0c0c0";
+        } else {
+            theme = "bronze"; icon = "fa-award"; color = "#cd7f32";
+        }
+
         podium.innerHTML += `
-            <div class="podium-card ${team.rank === 1 ? 'gold' : ''}">
-                <span class="text-xl font-black" style="color: ${color}">RANK ${team.rank}</span>
-                <h3 class="text-4xl font-black truncate text-white">${team.team}</h3>
-                <p class="text-6xl font-black" style="color: ${color}">${team.score}</p>
+            <div class="podium-card ${theme}">
+                <div class="podium-left">
+                    <i class="fas ${icon} trophy-icon" style="color: ${color}"></i>
+                    <span class="text-2xl font-black italic" style="color: ${color}">#${team.rank}</span>
+                </div>
+                
+                <div class="podium-right">
+                    <h3 class="podium-team-name">${team.team}</h3>
+                    <div class="podium-score-wrap">
+                        <span class="podium-score" style="color: ${color}">${team.score}</span>
+                        <span class="score-label">Points</span>
+                    </div>
+                </div>
             </div>`;
     });
 

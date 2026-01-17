@@ -137,3 +137,119 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cau
 #team-list-small, #full-table-body {
     transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
 }
+
+/* --- Enhanced Podium Visuals --- */
+
+.podium-card { 
+    position: relative;
+    padding: 2.5rem 1.5rem; 
+    border-radius: 3rem; 
+    text-align: center; 
+    border: 3px solid rgba(255,255,255,0.1);
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+/* Trophy Icon Animations */
+.trophy-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 15px currentColor);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Specific Medal Themes */
+.gold { 
+    border-color: #d4af37; 
+    background: radial-gradient(circle at top, rgba(212, 175, 55, 0.2) 0%, transparent 70%);
+    box-shadow: 0 0 60px rgba(212, 175, 55, 0.2);
+}
+.gold .trophy-icon { color: #d4af37; }
+
+.silver { 
+    border-color: #c0c0c0; 
+    background: radial-gradient(circle at top, rgba(192, 192, 192, 0.15) 0%, transparent 70%);
+}
+.silver .trophy-icon { color: #c0c0c0; }
+
+.bronze { 
+    border-color: #cd7f32; 
+    background: radial-gradient(circle at top, rgba(205, 127, 50, 0.15) 0%, transparent 70%);
+}
+.bronze .trophy-icon { color: #cd7f32; }
+
+/* --- Horizontal Podium Visuals --- */
+
+.podium-card { 
+    display: flex;
+    flex-direction: row; /* Horizontal split */
+    align-items: center;
+    padding: 1.5rem 2.5rem; 
+    border-radius: 3rem; 
+    border: 3px solid rgba(255,255,255,0.1);
+    background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+    gap: 2rem;
+    overflow: hidden;
+}
+
+/* LEFT DIVISION: ICON & RANK */
+.podium-left {
+    flex: 0 0 30%; /* Fixed width for the icon area */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-right: 2px solid rgba(255,255,255,0.1);
+    padding-right: 1.5rem;
+}
+
+/* RIGHT DIVISION: NAME & SCORE */
+.podium-right {
+    flex: 1;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.podium-team-name {
+    font-size: 3.8rem; /* Large and punchy */
+    font-weight: 900;
+    color: white;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Prevents long names from breaking layout */
+}
+
+.podium-score-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+}
+
+.podium-score {
+    font-size: 5rem;
+    font-weight: 900;
+}
+
+.score-label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+/* Specific Medal Themes (Restored) */
+.gold { border-color: #d4af37; box-shadow: 0 0 50px rgba(212, 175, 55, 0.15); }
+.silver { border-color: #c0c0c0; }
+.bronze { border-color: #cd7f32; }

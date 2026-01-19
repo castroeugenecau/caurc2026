@@ -77,7 +77,7 @@ function updateDashboard(cat, lvl) {
     }
 }
 
-// SUMO LEVEL 1: MAXIMIZED WITH ANIMATION AND CAPTIONS
+// SUMO LEVEL 1: MAXIMIZED WITH CENTERED ALIGNMENT
 function startSumoL1Cycle(groups) {
     const names = Object.keys(groups).sort();
     function next() {
@@ -93,8 +93,7 @@ function startSumoL1Cycle(groups) {
                             <tr class="text-gold uppercase tracking-widest text-xl opacity-70">
                                 <th class="text-left p-6">Participant</th>
                                 <th class="text-center p-6">Match History</th>
-                                <th class="text-right p-6">W—L Record</th>
-                            </tr>
+                                <th class="text-center p-6">W—L Record</th> </tr>
                         </thead>
                         <tbody>${teams.map((t, idx) => {
                             const s = (t.score || "x;x;x;x;x").split(';');
@@ -109,8 +108,7 @@ function startSumoL1Cycle(groups) {
                             <tr class="sumo-row-fade" style="animation-delay: ${idx * 0.15}s">
                                 <td class="text-4xl font-extrabold p-6 text-white uppercase">${t.team}</td>
                                 <td><div class="flex gap-4 justify-center">${m}</div></td>
-                                <td class="text-right text-6xl font-black text-gold monospace">${w}-${l}</td>
-                            </tr>`;
+                                <td class="text-center text-6xl font-black text-gold monospace">${w}-${l}</td> </tr>`;
                         }).join('')}</tbody>
                     </table>
                 </div>
@@ -118,9 +116,8 @@ function startSumoL1Cycle(groups) {
         clusterIndex++;
     }
     next(); 
-    displayTimer = setInterval(next, 7000); // Increased slightly to allow for animation time
+    displayTimer = setInterval(next, 7000);
 }
-
 function renderSumoLevel2(data) {
     const r1 = data.filter(t => t.rank == "1");
     const r2 = data.filter(t => t.rank == "2" || t.rank == "2X");

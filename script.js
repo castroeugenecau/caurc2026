@@ -34,6 +34,18 @@ async function refreshData() {
 function updateDashboard(cat, lvl) {
     const podium = document.getElementById('podium');
     const dbBody = document.getElementById('dashboard-body');
+
+    const balloon = document.getElementById('category-balloon');
+
+    // Update the Balloon Caption
+    const activeItem = document.querySelector(`.nav-item[data-cat="${cat}"][data-lvl="${lvl}"]`);
+    if (activeItem && balloon) {
+        balloon.innerText = activeItem.getAttribute('data-tip') || `${cat}: Level ${lvl}`;
+        // Re-trigger the animation
+        balloon.classList.remove('list-item-fade');
+        void balloon.offsetWidth; // Trigger reflow
+        balloon.classList.add('list-item-fade');
+    }
     if (displayTimer) clearInterval(displayTimer);
 
     if (cat === "Mini Sumo" && lvl === "1") {
@@ -51,11 +63,11 @@ function updateDashboard(cat, lvl) {
         podium.style.display = 'grid';
         dbBody.innerHTML = `
             <section class="w-[45%] glass-card flex flex-col overflow-hidden">
-                <div class="p-6 border-b border-white/10 bg-white/5"><h4 class="text-3xl font-black text-[#d4af37] uppercase">Next Challengers</h4></div>
+                <div class="p-6 border-b border-white/10 bg-white/5"><h4 class="text-3xl font-black text-[#d4af37] uppercase">Next Challengers for the Next Round</h4></div>
                 <div id="team-list-small" class="flex-1 p-6"></div>
             </section>
             <section class="w-[55%] glass-card flex flex-col overflow-hidden">
-                <div class="p-6 border-b border-white/10 bg-white/5"><h4 class="text-3xl font-black text-gray-400 uppercase">Standings</h4></div>
+                <div class="p-6 border-b border-white/10 bg-white/5"><h4 class="text-3xl font-black text-gray-400 uppercase">Complete Standings</h4></div>
                 <div id="full-table-container" class="flex-1 overflow-hidden">
                     <table class="w-full text-left"><tbody id="full-table-body"></tbody></table>
                 </div>
@@ -65,18 +77,26 @@ function updateDashboard(cat, lvl) {
     }
 }
 
-// SUMO LEVEL 1: MAXIMIZED
+// SUMO LEVEL 1: MAXIMIZED WITH ANIMATION AND CAPTIONS
 function startSumoL1Cycle(groups) {
     const names = Object.keys(groups).sort();
     function next() {
         const n = names[clusterIndex % names.length];
         const teams = groups[n];
+        
         document.getElementById('dashboard-body').innerHTML = `
             <div class="flex w-full h-full items-center justify-center p-4">
-                <div class="cluster-card-single">
-                    <h2 class="text-7xl font-black text-white mb-12 border-b-4 border-gold pb-4">CLUSTER ${n}</h2>
+                <div class="cluster-card-single list-item-fade">
+                    <h2 class="text-7xl font-black text-white mb-8 border-b-4 border-gold pb-4 uppercase italic">CLUSTER ${n}</h2>
                     <table class="w-full">
-                        <tbody>${teams.map(t => {
+                        <thead>
+                            <tr class="text-gold uppercase tracking-widest text-xl opacity-70">
+                                <th class="text-left p-6">Participant</th>
+                                <th class="text-center p-6">Match History</th>
+                                <th class="text-right p-6">W—L Record</th>
+                            </tr>
+                        </thead>
+                        <tbody>${teams.map((t, idx) => {
                             const s = (t.score || "x;x;x;x;x").split(';');
                             const w = s.filter(v => v === "1").length, l = s.filter(v => v === "0").length;
                             const m = s.map(v => {
@@ -84,17 +104,23 @@ function startSumoL1Cycle(groups) {
                                 if (v === "0") return `<div class="marker-history loss-bg"><i class="fas fa-times"></i></div>`;
                                 return `<div class="marker-history pending-bg"><i class="fas fa-hourglass-half animate-pulse"></i></div>`;
                             }).join('');
-                            return `<tr><td class="text-4xl font-extrabold p-6 text-white">${t.team}</td><td><div class="flex gap-4 justify-center">${m}</div></td><td class="text-right text-6xl font-black text-gold">${w}-${l}</td></tr>`;
+                            
+                            return `
+                            <tr class="sumo-row-fade" style="animation-delay: ${idx * 0.15}s">
+                                <td class="text-4xl font-extrabold p-6 text-white uppercase">${t.team}</td>
+                                <td><div class="flex gap-4 justify-center">${m}</div></td>
+                                <td class="text-right text-6xl font-black text-gold monospace">${w}-${l}</td>
+                            </tr>`;
                         }).join('')}</tbody>
                     </table>
                 </div>
             </div>`;
         clusterIndex++;
     }
-    next(); displayTimer = setInterval(next, 5000);
+    next(); 
+    displayTimer = setInterval(next, 7000); // Increased slightly to allow for animation time
 }
 
-// SUMO LEVEL 2: SCROLLING + 2X/3X LOGIC
 function renderSumoLevel2(data) {
     const r1 = data.filter(t => t.rank == "1");
     const r2 = data.filter(t => t.rank == "2" || t.rank == "2X");
@@ -126,7 +152,6 @@ function renderSumoLevel2(data) {
     document.getElementById('dashboard-body').innerHTML = `<div class="bracket-viewport glass-card"><div class="bracket-scroll-content">${bracketHTML}${bracketHTML}</div></div>`;
 }
 
-// Standard Paged view for Line/P&P
 function renderStandardPaged(data) {
     const p = document.getElementById('podium'); p.innerHTML = '';
     data.slice(0,3).forEach(t => {
@@ -137,8 +162,23 @@ function renderStandardPaged(data) {
         const l = document.getElementById('team-list-small'), r = document.getElementById('full-table-body');
         if(!l || !r) return;
         const rItems = data.slice((currentPage*6)%data.length, (currentPage*6)%data.length+6);
-        l.innerHTML = data.slice(3, 7).map(t => `<div class="flex justify-between items-center p-6 bg-white/5 rounded-2xl mb-4 border border-white/10"><span class="text-4xl font-black text-gold">#${t.rank}</span><span class="text-3xl font-bold uppercase">${t.team}</span><span class="bg-blue-600 px-6 py-2 rounded-xl font-black text-3xl">${t.score}</span></div>`).join('');
-        r.innerHTML = rItems.map(t => `<tr class="border-b border-white/5"><td class="p-6 text-4xl font-black text-gold">#${t.rank}</td><td class="p-6 text-3xl font-bold uppercase">${t.team}</td><td class="p-6 text-right text-4xl font-black">${t.score}</td></tr>`).join('');
+        
+        // Staggered Entry Animation for Next Challengers
+        l.innerHTML = data.slice(3, 7).map((t, idx) => `
+            <div class="list-item-fade flex justify-between items-center p-6 bg-white/5 rounded-2xl mb-4 border border-white/10" style="animation-delay: ${idx * 0.1}s">
+                <span class="text-4xl font-black text-gold">#${t.rank}</span>
+                <span class="text-3xl font-bold uppercase">${t.team}</span>
+                <span class="bg-blue-600 px-6 py-2 rounded-xl font-black text-3xl">${t.score}</span>
+            </div>`).join('');
+            
+        // Staggered Entry Animation for Standings Table
+        r.innerHTML = rItems.map((t, idx) => `
+            <tr class="list-item-fade border-b border-white/5" style="animation-delay: ${idx * 0.05}s">
+                <td class="p-6 text-4xl font-black text-gold">#${t.rank}</td>
+                <td class="p-6 text-3xl font-bold uppercase">${t.team}</td>
+                <td class="p-6 text-right text-4xl font-black">${t.score}</td>
+            </tr>`).join('');
+            
         currentPage++;
     }
     rotate(); displayTimer = setInterval(rotate, 6000);

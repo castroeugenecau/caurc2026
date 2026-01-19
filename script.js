@@ -3,176 +3,150 @@ const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRMAOD8nWYa5fGh
 let masterData = [];
 let currentPage = 0;
 let displayTimer = null;
+let clusterIndex = 0;
 
 async function init() {
-    // Start clock immediately
-    updateTime();
-    setInterval(updateTime, 1000);
-
-    // Initial data fetch
+    updateClock();
+    setInterval(updateClock, 1000);
     await refreshData();
-    // Refresh data every 30 seconds
-    setInterval(refreshData, 30000); 
+    setInterval(refreshData, 30000);
 }
 
-function updateTime() {
-    const timeEl = document.getElementById('sync-time');
-    if (timeEl) {
-        const now = new Date();
-        timeEl.innerText = "LAST SYNC: " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    }
+function updateClock() {
+    const el = document.getElementById('sync-time');
+    if (el) el.innerText = "LAST SYNC: " + new Date().toLocaleTimeString();
 }
 
 async function refreshData() {
     try {
         const response = await fetch(CSV_URL);
-        if (!response.ok) throw new Error('Network response was not ok');
         const text = await response.text();
         const rows = text.split('\n').filter(r => r.trim() !== '').slice(1);
-        
         masterData = rows.map(row => {
             const c = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(f => f.replace(/^"|"$/g, '').trim());
-            return {
-                category: c[1] || "", level: c[2] || "", team: c[3] || "Unknown", score: c[4] || "0", rank: parseInt(c[5]) || 99
-            };
+            return { category: c[1], level: c[2], team: c[3], score: c[4], rank: c[5] };
         });
-
         const active = document.querySelector('.nav-item.active');
-        if (active) updateDashboard(active.dataset.cat, active.dataset.lvl);
-    } catch (err) { 
-        console.error("Sync Error:", err);
-        document.getElementById('sync-time').innerText = "CONNECTION LOST - RETRYING...";
-    }
+        updateDashboard(active.dataset.cat, active.dataset.lvl);
+    } catch (err) { console.error("Sync Error", err); }
 }
 
 function updateDashboard(cat, lvl) {
-    const dashboardBody = document.getElementById('dashboard-body');
     const podium = document.getElementById('podium');
-
-    if (cat === "Mini Sumo") {
-        if (displayTimer) clearInterval(displayTimer);
-        podium.style.display = 'none';
-        dashboardBody.innerHTML = `
-            <div class="flex-1 flex flex-col items-center justify-center glass-card">
-                <i class="fas fa-user-ninja text-9xl text-[#d4af37] mb-6 animate-bounce"></i>
-                <h2 class="text-7xl font-black uppercase">Mini Sumo</h2>
-                <p class="text-3xl text-gray-500 tracking-[0.4em] uppercase">Data Integration Pending</p>
-            </div>`;
-        return;
-    }
-
-    podium.style.display = 'grid';
-    const filtered = masterData.filter(item => 
-        item.category.trim() === cat.trim() && item.level.toString().trim() === lvl.toString().trim()
-    ).sort((a, b) => a.rank - b.rank);
-
-    renderPagedUI(filtered, cat, lvl);
-}
-
-function renderPagedUI(data, cat, lvl) {
-    const podium = document.getElementById('podium');
-    const smallList = document.getElementById('team-list-small');
-    const tableBody = document.getElementById('full-table-body');
-    
+    const dbBody = document.getElementById('dashboard-body');
     if (displayTimer) clearInterval(displayTimer);
-    podium.innerHTML = ''; 
 
-    if (data.length === 0) return;
-
-// 1. HORIZONTAL PODIUM (Top 3)
-    data.slice(0, 3).forEach(team => {
-        let theme = "";
-        let icon = "";
-        let color = "";
-
-        if (team.rank === 1) {
-            theme = "gold"; icon = "fa-crown"; color = "#d4af37";
-        } else if (team.rank === 2) {
-            theme = "silver"; icon = "fa-medal"; color = "#c0c0c0";
-        } else {
-            theme = "bronze"; icon = "fa-award"; color = "#cd7f32";
-        }
-
-        podium.innerHTML += `
-            <div class="podium-card ${theme}">
-                <div class="podium-left">
-                    <i class="fas ${icon} trophy-icon" style="color: ${color}"></i>
-                    <span class="text-2xl font-black italic" style="color: ${color}">#${team.rank}</span>
-                </div>
-                
-                <div class="podium-right">
-                    <h3 class="podium-team-name">${team.team}</h3>
-                    <div class="podium-score-wrap">
-                        <span class="podium-score" style="color: ${color}">${team.score}</span>
-                        <span class="score-label">Points</span>
-                    </div>
-                </div>
-            </div>`;
-    });
-
-    // 2. DATA Slicing Logic
-    let challengerLimit = (lvl === "1") ? 15 : (cat === "Pick and Place" ? 5 : 4);
-    const challengersData = data.slice(3, challengerLimit);
-    const completeData = data; 
-
-    const perPageLeft = 4;   // 4 teams per page
-    const perPageRight = 5;  // 5 teams per page
-
-    function rotatePage() {
-        // Exit animation
-        [smallList, tableBody].forEach(el => {
-            if(el) { el.style.opacity = '0'; el.style.transform = 'translateX(-20px)'; }
+    if (cat === "Mini Sumo" && lvl === "1") {
+        podium.style.display = 'none';
+        const groups = {};
+        masterData.filter(i => i.category === "Mini Sumo" && i.level === "1").forEach(t => {
+            if (!groups[t.rank]) groups[t.rank] = [];
+            groups[t.rank].push(t);
         });
-
-        setTimeout(() => {
-            // Slicing
-            const leftIdx = (currentPage * perPageLeft) % (challengersData.length || 1);
-            const leftItems = challengersData.slice(leftIdx, leftIdx + perPageLeft);
-            
-            const rightIdx = (currentPage * perPageRight) % (completeData.length || 1);
-            const rightItems = completeData.slice(rightIdx, rightIdx + perPageRight);
-
-            // Render Left (4 items)
-            smallList.innerHTML = leftItems.map(team => `
-                <div class="challenger-row">
-                    <div class="flex items-center gap-8">
-                        <span class="challenger-rank">#${team.rank}</span>
-                        <span class="challenger-name truncate w-[400px]">${team.team}</span>
-                    </div>
-                    <span class="challenger-score">${team.score}</span>
+        startSumoL1Cycle(groups);
+    } else if (cat === "Mini Sumo" && lvl === "2") {
+        podium.style.display = 'none';
+        renderSumoLevel2(masterData.filter(i => i.category === "Mini Sumo" && i.level === "2"));
+    } else {
+        podium.style.display = 'grid';
+        dbBody.innerHTML = `
+            <section class="w-[45%] glass-card flex flex-col overflow-hidden">
+                <div class="p-6 border-b border-white/10 bg-white/5"><h4 class="text-3xl font-black text-[#d4af37] uppercase">Next Challengers</h4></div>
+                <div id="team-list-small" class="flex-1 p-6"></div>
+            </section>
+            <section class="w-[55%] glass-card flex flex-col overflow-hidden">
+                <div class="p-6 border-b border-white/10 bg-white/5"><h4 class="text-3xl font-black text-gray-400 uppercase">Standings</h4></div>
+                <div id="full-table-container" class="flex-1 overflow-hidden">
+                    <table class="w-full text-left"><tbody id="full-table-body"></tbody></table>
                 </div>
-            `).join('') || `<p class="text-gray-500 p-6 text-2xl">Finals in Progress...</p>`;
-
-            // Render Right (5 items)
-            tableBody.innerHTML = rightItems.map(team => `
-                <tr>
-                    <td class="rank-col">#${team.rank}</td>
-                    <td class="truncate max-w-[320px] text-white font-bold">${team.team}</td>
-                    <td class="text-right score-col text-white font-black">${team.score}</td>
-                </tr>
-            `).join('');
-
-            // Entry animation
-            [smallList, tableBody].forEach(el => {
-                if(el) { el.style.opacity = '1'; el.style.transform = 'translateX(0)'; }
-            });
-
-            currentPage++;
-        }, 600);
+            </section>`;
+        const filtered = masterData.filter(i => i.category === cat && i.level === lvl).sort((a,b) => parseInt(a.rank) - parseInt(b.rank));
+        renderStandardPaged(filtered);
     }
-
-    currentPage = 0;
-    rotatePage();
-    displayTimer = setInterval(rotatePage, 5600); // 5s pause + 0.6s anim
 }
 
-// Nav Listeners
-document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
-        updateDashboard(this.dataset.cat, this.dataset.lvl);
+// SUMO LEVEL 1: MAXIMIZED
+function startSumoL1Cycle(groups) {
+    const names = Object.keys(groups).sort();
+    function next() {
+        const n = names[clusterIndex % names.length];
+        const teams = groups[n];
+        document.getElementById('dashboard-body').innerHTML = `
+            <div class="flex w-full h-full items-center justify-center p-4">
+                <div class="cluster-card-single">
+                    <h2 class="text-7xl font-black text-white mb-12 border-b-4 border-gold pb-4">CLUSTER ${n}</h2>
+                    <table class="w-full">
+                        <tbody>${teams.map(t => {
+                            const s = (t.score || "x;x;x;x;x").split(';');
+                            const w = s.filter(v => v === "1").length, l = s.filter(v => v === "0").length;
+                            const m = s.map(v => {
+                                if (v === "1") return `<div class="marker-history win-bg"><i class="fas fa-check"></i></div>`;
+                                if (v === "0") return `<div class="marker-history loss-bg"><i class="fas fa-times"></i></div>`;
+                                return `<div class="marker-history pending-bg"><i class="fas fa-hourglass-half animate-pulse"></i></div>`;
+                            }).join('');
+                            return `<tr><td class="text-4xl font-extrabold p-6 text-white">${t.team}</td><td><div class="flex gap-4 justify-center">${m}</div></td><td class="text-right text-6xl font-black text-gold">${w}-${l}</td></tr>`;
+                        }).join('')}</tbody>
+                    </table>
+                </div>
+            </div>`;
+        clusterIndex++;
+    }
+    next(); displayTimer = setInterval(next, 5000);
+}
+
+// SUMO LEVEL 2: SCROLLING + 2X/3X LOGIC
+function renderSumoLevel2(data) {
+    const r1 = data.filter(t => t.rank == "1");
+    const r2 = data.filter(t => t.rank == "2" || t.rank == "2X");
+    const r3 = data.filter(t => t.rank == "3" || t.rank == "3X");
+
+    const getCard = (team) => {
+        if (!team) return `<div class="match-card opacity-10"><div class="text-2xl font-bold">Waiting...</div></div>`;
+        const s = team.score.split(';');
+        const isPending = team.rank.toString().includes('X');
+        const markers = s.slice(1).map(g => {
+            if (g === "1") return `<div class="m-mark win-bg"><i class="fas fa-check"></i></div>`;
+            if (g === "0") return `<div class="m-mark loss-bg"><i class="fas fa-times"></i></div>`;
+            return `<div class="m-mark pending-bg"><i class="fas fa-hourglass-half animate-pulse"></i></div>`;
+        }).join('');
+        const wins = s.filter(g=>g==="1").length;
+        return `<div class="match-card ${isPending ? 'waiting-match' : (wins >= 2 ? 'bracket-winner' : '')}">
+            <div class="text-[0.9rem] text-gold uppercase font-black mb-1">Cluster ${s[0]} ${isPending ? '• ROUND PENDING' : ''}</div>
+            <div class="flex justify-between items-center"><span class="text-3xl font-black uppercase">${team.team}</span><div class="flex gap-2">${markers}</div></div>
+        </div>`;
+    };
+
+    const bracketHTML = `
+        <div class="round-column"><h4 class="text-gray-500 font-black text-center text-3xl mb-6">ROUND 1</h4>${r1.map(t => getCard(t)).join('')}</div>
+        <div class="path-connector"><div class="path-line"></div><div class="path-line" style="border-radius: 20px 0 0 20px; border-left: 3px solid rgba(212,175,55,0.3); border-right:none"></div></div>
+        <div class="round-column"><h4 class="text-gold font-black text-center text-3xl mb-6">ROUND 2</h4>${[0,1,2,3,4,5].map(i => getCard(r2[i])).join('')}</div>
+        <div class="path-connector"><div class="path-line"></div></div>
+        <div class="round-column"><h4 class="text-white font-black text-center text-3xl mb-6 underline">CHAMPIONSHIP</h4>${[0,1,2].map(i => getCard(r3[i])).join('')}</div>`;
+
+    document.getElementById('dashboard-body').innerHTML = `<div class="bracket-viewport glass-card"><div class="bracket-scroll-content">${bracketHTML}${bracketHTML}</div></div>`;
+}
+
+// Standard Paged view for Line/P&P
+function renderStandardPaged(data) {
+    const p = document.getElementById('podium'); p.innerHTML = '';
+    data.slice(0,3).forEach(t => {
+        let color = t.rank=="1"?"#d4af37":t.rank=="2"?"#c0c0c0":"#cd7f32";
+        p.innerHTML += `<div class="podium-card ${t.rank==1?'gold':t.rank==2?'silver':'bronze'}"><div class="podium-left px-4"><span class="text-5xl font-black" style="color:${color}">#${t.rank}</span></div><div class="flex-1 px-4"><h3 class="podium-team-name text-2xl">${t.team}</h3><span class="text-4xl font-black" style="color:${color}">${t.score} PTS</span></div></div>`;
     });
-});
+    function rotate() {
+        const l = document.getElementById('team-list-small'), r = document.getElementById('full-table-body');
+        if(!l || !r) return;
+        const rItems = data.slice((currentPage*6)%data.length, (currentPage*6)%data.length+6);
+        l.innerHTML = data.slice(3, 7).map(t => `<div class="flex justify-between items-center p-6 bg-white/5 rounded-2xl mb-4 border border-white/10"><span class="text-4xl font-black text-gold">#${t.rank}</span><span class="text-3xl font-bold uppercase">${t.team}</span><span class="bg-blue-600 px-6 py-2 rounded-xl font-black text-3xl">${t.score}</span></div>`).join('');
+        r.innerHTML = rItems.map(t => `<tr class="border-b border-white/5"><td class="p-6 text-4xl font-black text-gold">#${t.rank}</td><td class="p-6 text-3xl font-bold uppercase">${t.team}</td><td class="p-6 text-right text-4xl font-black">${t.score}</td></tr>`).join('');
+        currentPage++;
+    }
+    rotate(); displayTimer = setInterval(rotate, 6000);
+}
+
+document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active'); updateDashboard(this.dataset.cat, this.dataset.lvl);
+}));
 
 init();

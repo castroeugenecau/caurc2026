@@ -1,255 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
 
-:root {
-    --cau-navy: #05080f;
-    --cau-gold: #d4af37;
-    --cau-blue: #2563eb;
-}
+:root { --cau-navy: #05080f; --cau-gold: #d4af37; --cau-blue: #2563eb; }
 
 body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cau-navy); color: white; margin: 0; overflow: hidden; }
 
-/* Engineering Grid Background */
 .bg-cau-blueprint {
     background-image: linear-gradient(rgba(212,175,55,0.05) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(212,175,55,0.05) 1px, transparent 1px);
     background-size: 60px 60px;
 }
 
-/* Nav Item Tooltips */
-.nav-item {
-    position: relative;
-    padding: 0.8rem 1.8rem;
-    color: #94a3b8;
-    font-size: 1.4rem;
-    font-weight: 800;
-    cursor: pointer;
-    border-radius: 1rem;
-    transition: 0.3s;
-}
+.glass-card { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(20px); border-radius: 2.5rem; border: 2px solid rgba(255,255,255,0.1); }
+
+/* Navigation */
+.nav-item { position: relative; padding: 0.8rem 1.8rem; color: #94a3b8; font-size: 1.4rem; font-weight: 800; cursor: pointer; border-radius: 1rem; transition: 0.3s; }
 .nav-item.active { background: var(--cau-blue); color: white; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4); }
 
-/* --- Restored Balloon Caption (Tooltip) --- */
-
-.nav-item {
-    position: relative; /* Anchor for the balloon */
-    padding: 0.8rem 1.8rem;
-    color: #94a3b8;
-    font-size: 1.4rem;
-    font-weight: 800;
-    cursor: pointer;
-    border-radius: 1rem;
-    transition: 0.3s;
+/* LEVEL 1: MAXIMIZED SPACE */
+.cluster-card-single { 
+    background: #000000; border-radius: 3rem; padding: 4rem; 
+    width: 60%; /* Increased width to maximize space */
+    margin: auto; /* Centered in the screen */
+    box-shadow: 0 0 60px rgba(0,0,0,0.8); border: 2px solid rgba(212,175,55,0.2); 
 }
+.marker-history { width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+.win-bg { background: #22c55e; color: white; }
+.loss-bg { background: #ef4444; color: white; }
+.pending-bg { background: #1e293b; border: 2px dashed #475569; color: #475569; }
 
-.nav-item.active { 
-    background: var(--cau-blue); 
-    color: white; 
-    box-shadow: 0 10px 30px rgba(37, 99, 235, 0.4); 
-}
+/* LEVEL 2: SCROLLING BRACKET */
+.bracket-viewport { height: 100%; width: 100%; overflow: hidden; position: relative; }
+.bracket-scroll-content { display: grid; grid-template-columns: 1.8fr 60px 1.5fr 60px 1.2fr; gap: 0; padding: 1.5rem; animation: smoothScroll 35s linear infinite; }
+@keyframes smoothScroll { 0% { transform: translateY(0); } 100% { transform: translateY(-50%); } }
 
-/* The Balloon Box */
-.nav-item::after {
-    content: attr(data-tip); /* Pulls text from HTML data-tip */
-    position: absolute;
-    top: 135%; /* Positioned below the button */
-    left: 50%;
-    transform: translateX(-50%) translateY(10px);
-    background: #d4af37; /* CAU Gold */
-    color: #000; /* Black text for best legibility on gold */
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.2s ease-out;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-    z-index: 999; /* Ensure it stays above everything */
-    border: 1px solid rgba(255,255,255,0.2);
-}
+.match-card { background: rgba(255, 255, 255, 0.04); border-left: 8px solid var(--cau-gold); border-radius: 12px; padding: 1.5rem; margin: 15px 0; min-height: 130px; }
+.match-card.waiting-match { border-left-color: #475569; background: rgba(255, 255, 255, 0.02); opacity: 0.5; }
+.bracket-winner { border-left-color: #22c55e; background: linear-gradient(90deg, rgba(34, 197, 94, 0.15), transparent); }
+.m-mark { width: 35px; height: 35px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+.path-line { border: 3px solid rgba(212, 175, 55, 0.3); border-left: none; height: 50%; width: 100%; border-radius: 0 20px 20px 0; }
 
-/* The Balloon Triangle Arrow */
-.nav-item::before {
-    content: '';
-    position: absolute;
-    top: 120%;
-    left: 50%;
-    transform: translateX(-50%) translateY(10px);
-    border-width: 10px;
-    border-style: solid;
-    border-color: transparent transparent #d4af37 transparent;
-    opacity: 0;
-    transition: all 0.2s ease-out;
-    z-index: 999;
-}
-
-/* Show on Hover */
-.nav-item:hover::after, 
-.nav-item:hover::before {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-}
-
-/* Containers */
-.glass-card { 
-    background: rgba(0, 0, 0, 0.7); 
-    backdrop-filter: blur(20px); 
-    border: 2px solid rgba(255, 255, 255, 0.1); 
-    border-radius: 2.5rem; 
-}
-
-.podium-card { 
-    padding: 1.5rem; 
-    border-radius: 2.5rem; 
-    text-align: center; 
-    border: 3px solid rgba(255,255,255,0.1);
-}
-.gold { border-color: var(--cau-gold); box-shadow: 0 0 50px rgba(212, 175, 55, 0.15); }
-
-/* --- LEFT SIDE: 4 CHALLENGERS --- */
-.challenger-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 1.5rem 2.5rem; 
-    background: rgba(255,255,255,0.04);
-    border-radius: 2rem; 
-    margin-bottom: 1rem;
-    border: 1px solid rgba(255,255,255,0.08);
-    height: 100px; /* Fixed height to ensure 4 fit perfectly */
-}
-.challenger-rank { font-size: 3.8rem; font-weight: 900; color: var(--cau-gold); font-style: italic; }
-.challenger-name { font-size: 3rem; font-weight: 800; color: white; }
-.challenger-score { font-size: 3.2rem; font-weight: 900; background: var(--cau-blue); padding: 0.5rem 1.8rem; border-radius: 1.2rem; }
-
-/* --- RIGHT SIDE: 5 RANKINGS --- */
-#full-table-body tr {
-    height: 90px; /* Fixed height to ensure 5 fit perfectly */
-}
-#full-table-body tr td {
-    font-size: 2.2rem; /* Slightly larger since we only show 5 */
-    padding: 1rem 2rem;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-#full-table-body .rank-col { font-size: 2.6rem; font-weight: 900; color: var(--cau-gold); }
-#full-table-body .score-col { font-size: 2.6rem; font-weight: 800; }
-
-/* Transitions */
-#team-list-small, #full-table-body {
-    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
-}
-
-/* --- Enhanced Podium Visuals --- */
-
-.podium-card { 
-    position: relative;
-    padding: 2.5rem 1.5rem; 
-    border-radius: 3rem; 
-    text-align: center; 
-    border: 3px solid rgba(255,255,255,0.1);
-    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-}
-
-/* Trophy Icon Animations */
-.trophy-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    filter: drop-shadow(0 0 15px currentColor);
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-}
-
-/* Specific Medal Themes */
-.gold { 
-    border-color: #d4af37; 
-    background: radial-gradient(circle at top, rgba(212, 175, 55, 0.2) 0%, transparent 70%);
-    box-shadow: 0 0 60px rgba(212, 175, 55, 0.2);
-}
-.gold .trophy-icon { color: #d4af37; }
-
-.silver { 
-    border-color: #c0c0c0; 
-    background: radial-gradient(circle at top, rgba(192, 192, 192, 0.15) 0%, transparent 70%);
-}
-.silver .trophy-icon { color: #c0c0c0; }
-
-.bronze { 
-    border-color: #cd7f32; 
-    background: radial-gradient(circle at top, rgba(205, 127, 50, 0.15) 0%, transparent 70%);
-}
-.bronze .trophy-icon { color: #cd7f32; }
-
-/* --- Horizontal Podium Visuals --- */
-
-.podium-card { 
-    display: flex;
-    flex-direction: row; /* Horizontal split */
-    align-items: center;
-    padding: 1.5rem 2.5rem; 
-    border-radius: 3rem; 
-    border: 3px solid rgba(255,255,255,0.1);
-    background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-    gap: 2rem;
-    overflow: hidden;
-}
-
-/* LEFT DIVISION: ICON & RANK */
-.podium-left {
-    flex: 0 0 30%; /* Fixed width for the icon area */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-right: 2px solid rgba(255,255,255,0.1);
-    padding-right: 1.5rem;
-}
-
-/* RIGHT DIVISION: NAME & SCORE */
-.podium-right {
-    flex: 1;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.podium-team-name {
-    font-size: 3.8rem; /* Large and punchy */
-    font-weight: 900;
-    color: white;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Prevents long names from breaking layout */
-}
-
-.podium-score-wrap {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-}
-
-.podium-score {
-    font-size: 5rem;
-    font-weight: 900;
-}
-
-.score-label {
-    font-size: 1.2rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    opacity: 0.6;
-}
-
-/* Specific Medal Themes (Restored) */
-.gold { border-color: #d4af37; box-shadow: 0 0 50px rgba(212, 175, 55, 0.15); }
-.silver { border-color: #c0c0c0; }
-.bronze { border-color: #cd7f32; }
+/* Standard Layout */
+.podium-card { display: flex; align-items: center; padding: 1rem 2rem; border-radius: 2.5rem; border: 3px solid rgba(255,255,255,0.1); background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, transparent 100%); gap: 1.5rem; }
+.podium-team-name { font-size: 3rem; font-weight: 900; text-transform: uppercase; }

@@ -1,10 +1,50 @@
-// Check for the cookie 'user_role'
-let role = document.cookie.split('; ').find(row => row.startsWith('user_role='));
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Internal Staff Portal</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f4f4f4; }
+        .container { border: 2px solid #ccc; display: inline-block; padding: 20px; background: #fff; border-radius: 10px; }
+        .denied { color: red; font-weight: bold; }
+        .granted { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Staff Dashboard</h1>
+        <hr>
+        <div id="display-area">Checking Authorization...</div>
+    </div>
 
-if (!role || role.split('=')[1] !== 'admin') {
-    document.getElementById('content').innerHTML = "<h3>Access Denied</h3><p>Current Role: Guest</p>";
-    // Set a default cookie if none exists to give them a hint
-    document.cookie = "user_role=guest; path=/";
-} else {
-    document.getElementById('content').innerHTML = "<h3>Welcome Admin!</h3><p>Flag: CAU{c00k1e_m0nst3r_4dm1n}</p>";
-}
+    <script>
+        // Function to get a specific cookie by name
+        function getCookie(name) {
+            let value = "; " + document.cookie;
+            let parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+        }
+
+        // The logic
+        const userRole = getCookie("user_role");
+
+        if (userRole === "admin") {
+            document.getElementById('display-area').innerHTML = `
+                <p class="granted">ACCESS GRANTED</p>
+                <p>Welcome back, Administrator.</p>
+                <p>Your Flag: <strong>CAU{c00k1e_m0nst3r_4dm1n}</strong></p>
+            `;
+        } else {
+            // Set a 'guest' cookie if none exists to give the player a hint
+            if (!userRole) {
+                document.cookie = "user_role=guest; path=/";
+            }
+            document.getElementById('display-area').innerHTML = `
+                <p class="denied">ACCESS DENIED</p>
+                <p>Current Role: <i>guest</i></p>
+                <p>Error: Only users with the <b>admin</b> role can view the secret key.</p>
+            `;
+        }
+    </script>
+</body>
+</html>

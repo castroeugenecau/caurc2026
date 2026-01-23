@@ -1,0 +1,10 @@
+// Check for the cookie 'user_role'
+let role = document.cookie.split('; ').find(row => row.startsWith('user_role='));
+
+if (!role || role.split('=')[1] !== 'admin') {
+    document.getElementById('content').innerHTML = "<h3>Access Denied</h3><p>Current Role: Guest</p>";
+    // Set a default cookie if none exists to give them a hint
+    document.cookie = "user_role=guest; path=/";
+} else {
+    document.getElementById('content').innerHTML = "<h3>Welcome Admin!</h3><p>Flag: CAU{c00k1e_m0nst3r_4dm1n}</p>";
+}

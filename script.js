@@ -7,8 +7,9 @@ async function init() {
     updateClock();
     setInterval(updateClock, 1000);
     await refreshData();
-    setupHoverEffects(); // Initialize the new hover popup logic
-    setInterval(refreshData, 30000);
+    setupHoverEffects();
+    // INCREASED REFRESH RATE: 5 seconds for live competition feel
+    setInterval(refreshData, 5000); 
 }
 
 function updateClock() {
@@ -28,6 +29,50 @@ async function refreshData() {
         const active = document.querySelector('.nav-item.active');
         if (active) updateDashboard(active.dataset.cat, active.dataset.lvl);
     } catch (err) { console.error("Sync Error", err); }
+}
+
+function getBracketCard(team, roundType) {
+    if (!team) {
+        return `<div class="glass-card opacity-20 border-2 border-dashed border-gray-500 w-full flex items-center justify-center h-full mb-1">
+            <span class="text-xl font-black text-gray-500 italic uppercase">Awaiting Match</span>
+        </div>`;
+    }
+    
+    const s = (team.score || "x;x;x").split(';');
+    const groupLabel = s[0];
+    const history = s.slice(1);
+    const wins = history.filter(v => v === "1").length;
+    
+    // ENHANCED COLORS: Distinctive states for winner, pending, and loser
+    const isWinner = wins >= 2;
+    const isPending = team.rank.toString().includes('X');
+    
+    let cardStyle = "border-white/10 bg-black/40";
+    if (isWinner) cardStyle = "border-green-500 bg-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.4)] ring-2 ring-green-500/50";
+    else if (isPending) cardStyle = "border-[#d4af37] bg-[#d4af37]/10 animate-pulse";
+
+    const config = {
+        r1: { padding: 'p-1', teamSize: 'text-xl', groupSize: 'text-[0.6rem]', iconSize: 'text-xl' },
+        r2: { padding: 'p-4', teamSize: 'text-4xl', groupSize: 'text-sm', iconSize: 'text-3xl' },
+        r3: { padding: 'p-8', teamSize: 'text-6xl', groupSize: 'text-lg', iconSize: 'text-5xl' }
+    }[roundType];
+
+    return `
+    <div class="glass-card ${config.padding} ${cardStyle} flex flex-col justify-center border-2 w-full h-full mb-1 transition-all">
+        <div class="${config.groupSize} text-[#d4af37] font-black uppercase mb-1 tracking-widest">
+            GROUP ${groupLabel} ${isPending ? '• IN PROGRESS' : ''}
+        </div>
+        <div class="flex justify-between items-center w-full">
+            <span class="${config.teamSize} font-black uppercase text-white truncate mr-4">${team.team}</span>
+            <div class="flex gap-2">
+                ${history.map(v => {
+                    if (v === "1") return `<span class="text-green-400">●</span>`;
+                    if (v === "0") return `<span class="text-red-500">●</span>`;
+                    return `<span class="text-gray-600">○</span>`;
+                }).join('')}
+            </div>
+        </div>
+    </div>`;
 }
 
 function setupHoverEffects() {

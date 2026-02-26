@@ -43,3 +43,49 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cau
     white-space: nowrap;
     font-size: 1.2rem;
 }
+
+/* Custom slower beat for the Crown */
+.fa-beat-low {
+    --fa-animation-duration: 3s;
+    --fa-beat-scale: 1.1;
+}
+
+/* Make the podium area taller to fit vertical cards */
+#podium {
+    min-height: 280px !important;
+    align-items: flex-end; /* Aligns 2nd and 3rd to the bottom, 1st will pop up */
+}
+
+/* Specific glow for the top rank */
+.podium-card[style*="rank #1"] {
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.1) 0%, rgba(0,0,0,0.8) 100%);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(212, 175, 55, 0.1);
+}
+
+/* Custom icon animation speed */
+.fa-beat { --fa-animation-duration: 2s; }
+.fa-bounce { --fa-animation-duration: 2.5s; }
+.fa-shake { --fa-animation-duration: 3s; }
+
+/* Custom scrollbar for mobile nav */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Ensure the blueprint background covers the full scrolling height */
+.bg-cau-blueprint {
+    background-attachment: fixed;
+}
+
+/* Adjust card padding for smaller screens */
+.glass-card {
+    border-radius: 1rem; /* Smaller radius for mobile */
+}
+
+@media (min-width: 768px) {
+    .glass-card { border-radius: 2rem; }
+}

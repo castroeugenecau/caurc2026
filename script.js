@@ -32,6 +32,12 @@ async function refreshData() {
 }
 
 function getBracketCard(team, roundType) {
+    const markers = history.map(v => {
+    if (v === "1") return `<span class="text-green-500">✅</span>`;
+    if (v === "0") return `<span class="text-red-500">❌</span>`;
+    return `<span class="opacity-50">⏳</span>`;
+    }).join('');
+    
     if (!team) {
         return `<div class="glass-card opacity-20 border-2 border-dashed border-gray-500 w-full flex items-center justify-center h-full mb-1">
             <span class="text-xl font-black text-gray-500 italic uppercase">Awaiting Match</span>
@@ -226,20 +232,40 @@ function renderSumoLevel2Bracket(data) {
 function renderStaticSumoGroups(groups) {
     const names = Object.keys(groups).sort();
     document.getElementById('dashboard-body').innerHTML = `
-        <div class="grid grid-cols-3 grid-rows-2 gap-6 w-full h-full p-2">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full h-full p-2">
             ${names.map(n => {
                 const teams = groups[n];
                 return `
-                <div class="glass-card p-6 flex flex-col border-2 border-gold/30 bg-black/60 shadow-2xl">
-                    <h2 class="text-5xl font-black text-gold border-b-4 border-gold/40 mb-4 uppercase italic tracking-tight">GROUP ${n}</h2>
+                <div class="glass-card p-4 md:p-6 flex flex-col border-2 border-gold/30 bg-black/60 shadow-2xl">
+                    <h2 class="text-3xl md:text-5xl font-black text-gold border-b-4 border-gold/40 mb-4 uppercase italic tracking-tight">GROUP ${n}</h2>
                     <table class="w-full">
-                        <thead><tr class="text-gold uppercase text-sm opacity-80 border-b border-white/10"><th class="text-left pb-3">Team Name</th><th class="text-center pb-3">History</th><th class="text-right pb-3">W-L</th></tr></thead>
+                        <thead>
+                            <tr class="text-gold uppercase text-[10px] md:text-sm opacity-80 border-b border-white/10">
+                                <th class="text-left pb-3">Team</th>
+                                <th class="text-center pb-3">History (4 Rounds)</th>
+                                <th class="text-right pb-3">WIN -LOSS</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             ${teams.map(t => {
-                                const s = (t.score || "x;x;x;x;x").split(';');
-                                const w = s.filter(v => v === "1").length, l = s.filter(v => v === "0").length;
-                                const markers = s.map(v => v === "1" ? '✅' : v === "0" ? '❌' : '⏳').join(' ');
-                                return `<tr class="border-b border-white/5"><td class="font-black py-3 text-white uppercase truncate max-w-[140px] text-2xl">${t.team}</td><td class="text-center py-3 text-xl tracking-widest">${markers}</td><td class="text-right font-black text-gold py-3 text-4xl">${w}-${l}</td></tr>`;
+                                // Slice to exactly 4 rounds
+                                const s = (t.score || "x;x;x;x").split(';').slice(0, 4);
+                                const w = s.filter(v => v === "1").length;
+                                const l = s.filter(v => v === "0").length;
+                                
+                                // Reverting to your preferred icons
+                                const markers = s.map(v => 
+                                    v === "1" ? '✅' : 
+                                    v === "0" ? '❌' : 
+                                    '⏳'
+                                ).join(' ');
+                                
+                                return `
+                                <tr class="border-b border-white/5">
+                                    <td class="font-black py-3 text-white uppercase truncate max-w-[100px] md:max-w-[140px] text-lg md:text-2xl">${t.team}</td>
+                                    <td class="text-center py-3 text-lg md:text-xl tracking-tighter md:tracking-widest">${markers}</td>
+                                    <td class="text-right font-black text-gold py-3 text-2xl md:text-4xl">${w}-${l}</td>
+                                </tr>`;
                             }).join('')}
                         </tbody>
                     </table>
@@ -251,16 +277,47 @@ function renderStaticSumoGroups(groups) {
 function renderStandardPaged(data) {
     const p = document.getElementById('podium');
     const dbBody = document.getElementById('dashboard-body');
-    const activeItem = document.querySelector('.nav-item.active');
-    const category = activeItem ? activeItem.dataset.cat : "";
-    const unit = category === "Line Following" ? "sec" : "PTS";
-    data.slice(0,3).forEach(t => {
-        let color = t.rank=="1" ? "#d4af37" : (t.rank=="2" ? "#c0c0c0" : "#cd7f32");
-        p.innerHTML += `<div class="podium-card glass-card flex items-center p-6" style="border-left: 10px solid ${color}"><div class="px-4"><span class="text-6xl font-black" style="color:${color}">#${t.rank}</span></div><div class="flex-1 px-4 overflow-hidden"><h3 class="text-2xl font-black uppercase text-white truncate">${t.team}</h3><span class="text-4xl font-black" style="color:${color}">${t.score} ${unit}</span></div></div>`;
-    });
+    const unit = document.querySelector('.nav-item.active').dataset.cat === "Line Following" ? "sec" : "PTS";
+
+    const top3 = data.slice(0, 3);
+    // On Mobile, we show 1-2-3. On Desktop/TV, we show 2-1-3.
+    const isMobile = window.innerWidth < 768;
+    const visualOrder = isMobile ? top3 : [top3[1], top3[0], top3[2]];
+
+    p.innerHTML = visualOrder.map(t => {
+        if (!t) return '';
+        const isFirst = t.rank == "1";
+        const color = isFirst ? "#d4af37" : (t.rank == "2" ? "#c0c0c0" : "#cd7f32");
+        const icon = isFirst ? "fa-crown" : (t.rank == "2" ? "fa-medal" : "fa-award");
+        
+        return `
+            <div class="podium-card glass-card flex flex-row md:flex-col items-center p-4 md:p-6 border-l-4 md:border-l-0 md:border-t-4 transition-all" 
+                 style="border-color: ${color};">
+                <div class="md:mb-4 flex-shrink-0">
+                    <i class="fa-solid ${icon} fa-beat ${isFirst ? 'text-5xl md:text-7xl' : 'text-3xl md:text-5xl'}" style="color: ${color}"></i>
+                </div>
+                <div class="ml-4 md:ml-0 text-left md:text-center overflow-hidden">
+                    <div class="text-[10px] font-black uppercase opacity-60" style="color: ${color}">Rank #${t.rank}</div>
+                    <h3 class="text-lg md:text-2xl font-black uppercase text-white truncate">${t.team}</h3>
+                    <span class="text-xl md:text-3xl font-black" style="color: ${color}">${t.score} ${unit}</span>
+                </div>
+            </div>`;
+    }).join('');
+
+    // List View: 1 column on mobile, 2 on tablet, 3 on TV
     const list = data.slice(3, 30);
-    const rows = Math.ceil(list.length / 3);
-    dbBody.innerHTML = `<div class="glass-card w-full h-full p-8 overflow-hidden"><div class="grid grid-cols-3 grid-flow-col gap-x-10 gap-y-3 h-full" style="grid-template-rows: repeat(${rows || 1}, 1fr);">${list.map(t => `<div class="flex justify-between items-center bg-white/5 rounded-xl px-6 py-2 border border-white/5"><span class="text-2xl font-black text-gold">#${t.rank}</span><span class="text-2xl font-bold uppercase truncate flex-1 px-6 text-white">${t.team}</span><span class="text-2xl font-black text-blue-500">${t.score} ${unit}</span></div>`).join('')}</div></div>`;
+    dbBody.innerHTML = `
+        <div class="glass-card w-full p-4 md:p-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                ${list.map(t => `
+                    <div class="flex justify-between items-center bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+                        <span class="font-black text-gold mr-2">#${t.rank}</span>
+                        <span class="font-bold uppercase truncate flex-1 text-white text-sm md:text-base">${t.team}</span>
+                        <span class="font-black text-blue-500 ml-2 text-sm">${t.score} sec</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
 }
 
 document.querySelectorAll('.nav-item').forEach(btn => btn.addEventListener('click', function() {

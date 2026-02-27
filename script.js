@@ -303,17 +303,20 @@ function renderStandardPaged(data) {
                 </div>
             </div>`;
     }).join('');
-
+    
     // List View: 1 column on mobile, 2 on tablet, 3 on TV
     const list = data.slice(3, 30);
     dbBody.innerHTML = `
-        <div class="glass-card w-full p-4 md:p-8">
+        <div class="glass-card w-full p-4 md:p-8 mb-10">
+            <h2 class="text-gold font-black uppercase tracking-widest mb-4 text-sm md:text-base">Leaderboard</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 ${list.map(t => `
-                    <div class="flex justify-between items-center bg-white/5 rounded-xl px-4 py-2 border border-white/5">
-                        <span class="font-black text-gold mr-2">#${t.rank}</span>
-                        <span class="font-bold uppercase truncate flex-1 text-white text-sm md:text-base">${t.team}</span>
-                        <span class="font-black text-blue-500 ml-2 text-sm">${t.score} sec</span>
+                    <div class="flex justify-between items-center bg-white/5 rounded-xl px-4 py-3 border border-white/5">
+                        <div class="flex items-center gap-3">
+                            <span class="font-black text-gold">#${t.rank}</span>
+                            <span class="font-bold uppercase text-white text-sm md:text-base">${t.team}</span>
+                        </div>
+                        <span class="font-black text-blue-500 text-sm md:text-lg">${t.score} ${unit}</span>
                     </div>
                 `).join('')}
             </div>

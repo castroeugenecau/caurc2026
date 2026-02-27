@@ -1,11 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&display=swap');
 :root { --cau-navy: #05080f; --cau-gold: #d4af37; --cau-blue: #2563eb; }
-body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cau-navy); color: white; margin: 0; overflow: hidden; }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--cau-navy);
+    color: white;
+    margin: 0;
+    /* REMOVE overflow: hidden; */
+    overflow-x: hidden; 
+    overflow-y: auto; 
+}
 
+html {
+    /* Ensure the background stays consistent while scrolling */
+    background-color: #05080f;
+    height: auto;
+}
 /* Grid Background */
 .bg-cau-blueprint {
-    background-image: linear-gradient(rgba(212,175,55,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(212,175,55,0.05) 1px, transparent 1px);
-    background-size: 60px 60px;
+    /* This keeps the grid pattern behind the content even as you scroll */
+    background-attachment: fixed;
+    min-height: 100vh;
 }
 
 /* Glass Effect Cards */
